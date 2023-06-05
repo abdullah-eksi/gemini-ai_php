@@ -27,23 +27,23 @@ $saat = "Şuanda Saat " . date("H:i");
 
 if (isset($_POST["sor"])) {
     //api anahtarı
-    $api_key = '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';
+    $api_key = 'api_key';
     //api anahtarı
 
     // endpoint
 
     /*
-    endpoit bunları denedim üstekinde endpoint hatası diyor alttakınde limit hatası internette bu endpointleri buldum
+
     $endpoint_url = 'https://api.openai.com/v1/engines/davinci-codex/completions';
     $endpoint_url = 'https://api.openai.com/v1/engines/codex/completions';
     */
 
-    $endpoint_url = 'https://api.openai.com/v1/engines/codex/completions';
+    $endpoint_url = 'https://api.openai.com/v1/engines/davinci-codex/completions';
     // endpoint
 
 
 
-    // tanımmlı sorular array 
+    // tanımmlı sorular array
     $qa_pairs = array(
         'Adın Ne' => 'Benim Adım Zeki',
         'Sen Kimsin' => 'Ben Senin Yardımcı Robotunum',
@@ -76,7 +76,7 @@ if (isset($_POST["sor"])) {
     // büyük küçük harf özel karakter temizleme
     $user_message = preg_replace("/[^a-zA-ZıİiIğĞüÜşŞöÖçÇ0-9]+/u", " ", $user_message);
     $user_message = trim($user_message);
-    // büyük küçük harf özel karakter 
+    // büyük küçük harf özel karakter
 
     //eger chatpgt kelimesini içeriyorsa random cevap ver array içinden
     if (stripos($user_message, 'Chatgpt') !== false) {
@@ -94,7 +94,7 @@ if (isset($_POST["sor"])) {
 
             similar_text($user_message, $clean_question, $similarity);
 
-            //sorudaki özel karakterleri kontrol et benzerliği ayarla 
+            //sorudaki özel karakterleri kontrol et benzerliği ayarla
             if ($similarity >= 60) {
                 $response = $answer;
                 break;
