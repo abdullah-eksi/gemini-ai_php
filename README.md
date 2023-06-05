@@ -1,4 +1,8 @@
 # Chat GPT PHP
+<div>
+<img src='https://mrvian.com/wp-content/uploads/2023/02/logo-open-ai.png' width="450px" height="300px">
+<img src='https://myweb.abdullaheksi.com.tr/image/robo2.png' width="450px" height="300px" >
+</div>
 Chat GPT PHP, OpenAI GPT-3 modelini kullanarak basit bir sohbet yapay zekası oluşturmak için PHP dilinde yazılmıştır. Gerekli bilgileri girip kolayca kullanabilir özelleştirebilirsiniz veya chatgpt api kullanmayıp
 isterseniz koddan chat gpt kısmınıda kaldırıp kendi yapay zekanızı soru gırdılerıne bır databaseden veri girip yapabılırsınız 
 
