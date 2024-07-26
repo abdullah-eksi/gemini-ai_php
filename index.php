@@ -24,7 +24,7 @@
 
         if (isset($_POST["sor"])) {
             //api anahtarı
-            $api_key = 'YOUR_API_KEY';
+            $api_key = 'AIzaSyDjKVJzC_k7128Bt0fAw4uuqSMjfJzXPjw';
             //api anahtarı
 
             // endpoint
@@ -83,7 +83,7 @@
                 }
 
                 if ($response === null) {
-                    // tanımlı sorular veya chatgpt eşleşmiyorsa Gemini AI apisini kullan
+                    // tanımlı sorular eşleşmiyorsa Gemini AI apisini kullan
                     $data = array(
                         "contents" => array(
                             array(
@@ -141,10 +141,13 @@
                     } else {
                         $json_response = json_decode($response, true);
 
-                        if (!isset($json_response['generations'][0]['content'])) {
+                        if (!isset($json_response['candidates'][0]['content']['parts'])) {
                             $response = "Üzgünüm Bu Konu Hakkında Bir Bilgim Yok tekrar deneyin";
                         } else {
-                            $response = $json_response['generations'][0]['content'];
+                            $response = '';
+                            foreach ($json_response['candidates'][0]['content']['parts'] as $part) {
+                                $response .= $part['text'] . ' ';
+                            }
                         }
                     }
 
