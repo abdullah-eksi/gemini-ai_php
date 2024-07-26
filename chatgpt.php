@@ -27,18 +27,11 @@ $saat = "Şuanda Saat " . date("H:i");
 
 if (isset($_POST["sor"])) {
     //api anahtarı
-    $api_key = 'api_key';
+    $api_key = 'YOUR_GEMINI_API_KEY';
     //api anahtarı
 
     // endpoint
-
-    /*
-
-    $endpoint_url = 'https://api.openai.com/v1/engines/davinci-codex/completions';
-    $endpoint_url = 'https://api.openai.com/v1/engines/codex/completions';
-    */
-
-    $endpoint_url = 'https://api.openai.com/v1/engines/davinci-codex/completions';
+    $endpoint_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent?key=' . $api_key;
     // endpoint
 
 
@@ -63,12 +56,9 @@ if (isset($_POST["sor"])) {
 
     //eger soru chatgpt içeriyorsa verilcek cevaplar
     $gptycevap = array(
-        '1' => 'Chatgpt iyi bir dostur ben zeki',
-        '2' => 'Tanıyorum iyi bir dosttur kendisi',
-        '3' => 'Buyrun Ben Yardımcı Olayım Ben Robot Zeki '
+        '1' => 'Tanıyorum iyi bir dosttur kendisi',
+        '2' => 'Buyrun Ben Yardımcı Olayım Ben Robot Zeki '
     );
-
-    //eger soru chatgpt içeriyorsa verilcek cevaplar
 
     //user_message kullanıcının yazdı mesaj
     $user_message = $_POST["soru"];
@@ -82,81 +72,94 @@ if (isset($_POST["sor"])) {
     if (stripos($user_message, 'Chatgpt') !== false) {
         $rand = array_rand($gptycevap);
         $response = $gptycevap[$rand];
-
-        //eger chatpgt kelimesini içeriyorsa random cevap ver array içinden
     } else {
         // degilse kullanıcın yazdı soruyu tanımlı sorularda kontrol et
+        $response = null;
         foreach ($qa_pairs as $question => $answer) {
             //sorudaki özel karakterleri kontrol et
             $clean_question = preg_replace("/[^a-zA-ZıİiIğĞüÜşŞöÖçÇ0-9]+/u", " ", $question);
             $clean_question = trim($clean_question);
 
-
             similar_text($user_message, $clean_question, $similarity);
 
-            //sorudaki özel karakterleri kontrol et benzerliği ayarla
             if ($similarity >= 60) {
                 $response = $answer;
                 break;
-            } else {
-                // tanımlı sorular veya chatgpt eşleşmiyorsa openai apisini kullan
-                $data = array(
-                    'prompt' => $user_message,
-                    'max_tokens' => 50,
-                    'temperature' => 0.5,
-                    'n' => 1,
-                    'stop' => "\n"
-                );
-
-
-                $json_data = json_encode($data);
-
-                $ch = curl_init();
-
-
-                curl_setopt($ch, CURLOPT_URL, $endpoint_url);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $json_data);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                    'Content-Type: application/json',
-                    'Authorization: Bearer ' . $api_key
-                )
-                );
-
-
-                $response = curl_exec($ch);
-
-
-                // eger api isteğinde sıkıntı olduysa hata mesajı gondermek yerıne yapay zeka sasırtması gonder
-                if ($response === false) {
-                    $response = "Üzgünüm Bu Konu Hakkında Bir Bilgim Yok tekrar deneyin ";
-                } else {
-
-                    $json_response = json_decode($response, true);
-
-                    // eger api isteğinde sıkıntı olduysa hata mesajı gondermek yerıne yapay zeka sasırtması gonder
-                    if (!isset($json_response['choices'][0]['text'])) {
-                        $response = "Üzgünüm Bu Konu Hakkında Bir Bilgim Yok tekrar deneyin";
-                    } else {
-                        // bot tarafından donen mesajı parçala
-                        $generated_text = $json_response['choices'][0]['text'];
-                        // bot tarafından donen mesajı parçala
-                        $response = $generated_text;
-                    }
-
-
-                }
-
             }
+        }
+
+        if ($response === null) {
+            // tanımlı sorular veya chatgpt eşleşmiyorsa Gemini AI apisini kullan
+            $data = array(
+                "contents" => array(
+                    array(
+                        "role" => "user",
+                        "parts" => array(
+                            array(
+                                "text" => $user_message
+                            )
+                        )
+                    )
+                ),
+                "generationConfig" => array(
+                    "temperature" => 0.9,
+                    "topK" => 1,
+                    "topP" => 1,
+                    "maxOutputTokens" => 2048,
+                    "stopSequences" => []
+                ),
+                "safetySettings" => array(
+                    array(
+                        "category" => "HARM_CATEGORY_HARASSMENT",
+                        "threshold" => "BLOCK_MEDIUM_AND_ABOVE"
+                    ),
+                    array(
+                        "category" => "HARM_CATEGORY_HATE_SPEECH",
+                        "threshold" => "BLOCK_MEDIUM_AND_ABOVE"
+                    ),
+                    array(
+                        "category" => "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                        "threshold" => "BLOCK_MEDIUM_AND_ABOVE"
+                    ),
+                    array(
+                        "category" => "HARM_CATEGORY_DANGEROUS_CONTENT",
+                        "threshold" => "BLOCK_MEDIUM_AND_ABOVE"
+                    )
+                )
+            );
+
+            $json_data = json_encode($data);
+
+            $ch = curl_init();
+
+            curl_setopt($ch, CURLOPT_URL, $endpoint_url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $json_data);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                'Content-Type: application/json'
+            ));
+
+            $response = curl_exec($ch);
+
+            if ($response === false) {
+                $response = "Üzgünüm Bu Konu Hakkında Bir Bilgim Yok tekrar deneyin";
+            } else {
+                $json_response = json_decode($response, true);
+
+                if (!isset($json_response['generations'][0]['content'])) {
+                    $response = "Üzgünüm Bu Konu Hakkında Bir Bilgim Yok tekrar deneyin";
+                } else {
+                    $response = $json_response['generations'][0]['content'];
+                }
+            }
+
+            curl_close($ch);
         }
     }
 
     echo "<hr>";
-    // bot tarafından gelen mesajı yaz
     echo $response;
-    // bot tarafından gelen mesajı yaz
 }
-
 
 ?>
