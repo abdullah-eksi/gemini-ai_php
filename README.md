@@ -17,8 +17,8 @@ Zeki is an interactive chatbot implemented in PHP, designed to respond to user q
 ## Setup
 1. **Clone the Repository**
     ```bash
-    git clone https://github.com/your-repository/zeki-chatbot.git
-    cd zeki-chatbot
+    git clone https://github.com/abdullah-eksi/gemini-ai_php.git
+    cd gemini-ai_php
     ```
 
 2. **Configure the API Key**
