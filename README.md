@@ -114,49 +114,77 @@ if (stripos($user_message, 'Chatgpt') !== false) {
 If no predefined answer is found, the script sends a request to the Gemini AI API to generate a response.
 
 ```php
-if ($response === null) {
-    $data = array(
-        "contents" => array(
-            array(
-                "role" => "user",
-                "parts" => array(
-                    array(
-                        "text" => $user_message
-                    )
-                )
-            )
-        ),
-        ...
-    );
+ if ($response === null) {
+                    // tanımlı sorular eşleşmiyorsa Gemini AI apisini kullan
+                    $data = array(
+                        "contents" => array(
+                            array(
+                                "role" => "user",
+                                "parts" => array(
+                                    array(
+                                        "text" => $user_message
+                                    )
+                                )
+                            )
+                        ),
+                        "generationConfig" => array(
+                            "temperature" => 1,
+                            "topK" => 64,
+                            "topP" => 0.95,
+                            "maxOutputTokens" => 8192,
+                            "responseMimeType" => "text/plain"
+                        ),
+                        "safetySettings" => array(
+                            array(
+                                "category" => "HARM_CATEGORY_HARASSMENT",
+                                "threshold" => "BLOCK_MEDIUM_AND_ABOVE"
+                            ),
+                            array(
+                                "category" => "HARM_CATEGORY_HATE_SPEECH",
+                                "threshold" => "BLOCK_MEDIUM_AND_ABOVE"
+                            ),
+                            array(
+                                "category" => "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                                "threshold" => "BLOCK_MEDIUM_AND_ABOVE"
+                            ),
+                            array(
+                                "category" => "HARM_CATEGORY_DANGEROUS_CONTENT",
+                                "threshold" => "BLOCK_MEDIUM_AND_ABOVE"
+                            )
+                        )
+                    );
 
-    $json_data = json_encode($data);
+                    $json_data = json_encode($data);
 
-    $ch = curl_init();
+                    $ch = curl_init();
 
-    curl_setopt($ch, CURLOPT_URL, $endpoint_url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $json_data);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-        'Content-Type: application/json'
-    ));
+                    curl_setopt($ch, CURLOPT_URL, $endpoint_url);
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($ch, CURLOPT_POST, true);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, $json_data);
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                        'Content-Type: application/json'
+                    ));
 
-    $response = curl_exec($ch);
+                    $response = curl_exec($ch);
 
-    if ($response === false) {
-        $response = "Üzgünüm Bu Konu Hakkında Bir Bilgim Yok tekrar deneyin";
-    } else {
-        $json_response = json_decode($response, true);
+                    if ($response === false) {
+                        $response = "Üzgünüm Bu Konu Hakkında Bir Bilgim Yok tekrar deneyin";
+                    } else {
+                        $json_response = json_decode($response, true);
 
-        if (!isset($json_response['generations'][0]['content'])) {
-            $response = "Üzgünüm Bu Konu Hakkında Bir Bilgim Yok tekrar deneyin";
-        } else {
-            $response = $json_response['generations'][0]['content'];
-        }
-    }
+                        if (!isset($json_response['candidates'][0]['content']['parts'])) {
+                            $response = "Üzgünüm Bu Konu Hakkında Bir Bilgim Yok tekrar deneyin";
+                        } else {
+                            $response = '';
+                            foreach ($json_response['candidates'][0]['content']['parts'] as $part) {
+                                $response .= $part['text'] . ' ';
+                            }
+                        }
+                    }
 
-    curl_close($ch);
-}
+                    curl_close($ch);
+                }
 ```
 
 ### Displaying the Response
