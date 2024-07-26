@@ -24,11 +24,11 @@
 
         if (isset($_POST["sor"])) {
             //api anahtarı
-            $api_key = 'YOUR_GEMINI_API_KEY';
+            $api_key = 'YOUR_API_KEY';
             //api anahtarı
 
             // endpoint
-            $endpoint_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent?key=' . $api_key;
+            $endpoint_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=' . $api_key;
             // endpoint
 
             // tanımmlı sorular array
@@ -96,11 +96,11 @@
                             )
                         ),
                         "generationConfig" => array(
-                            "temperature" => 0.9,
-                            "topK" => 1,
-                            "topP" => 1,
-                            "maxOutputTokens" => 2048,
-                            "stopSequences" => []
+                            "temperature" => 1,
+                            "topK" => 64,
+                            "topP" => 0.95,
+                            "maxOutputTokens" => 8192,
+                            "responseMimeType" => "text/plain"
                         ),
                         "safetySettings" => array(
                             array(
