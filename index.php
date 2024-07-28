@@ -24,7 +24,7 @@
 
         if (isset($_POST["sor"])) {
             //api anahtarı
-            $api_key = 'AIzaSyDjKVJzC_k7128Bt0fAw4uuqSMjfJzXPjw';
+            $api_key = '';
             //api anahtarı
 
             // endpoint
